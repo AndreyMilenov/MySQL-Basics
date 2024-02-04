@@ -1,189 +1,40 @@
-# One to One Relationship
-CREATE DATABASE `TableRelations`;
-USE TableRelations;
-CREATE TABLE `passports`
-(
-    `passport_id`     INT PRIMARY KEY AUTO_INCREMENT,
-    `passport_number` VARCHAR(50) UNIQUE NOT NULL
-);
+# first exer
+SELECT d.manager_id                       AS employee_id,
+       CONCAT(first_name, ' ', last_name) AS full_name,
+       d.department_id,
+       d.name                             AS department_name
+FROM departments AS d
+         JOIN employees AS a ON d.manager_id = a.employee_id
+ORDER BY a.employee_id
+LIMIT 5;
 
-INSERT INTO `passports`(`passport_id`, `passport_number`)
-VALUES (101, 'N34FG21B'),
-       (102, 'K65LO4R7'),
-       (103, 'ZE657QP2');
-CREATE TABLE `people`
-(
-    `person_id`   INT PRIMARY KEY AUTO_INCREMENT,
-    `first_name`  VARCHAR(50) NOT NULL ,
-    `salary`      DECIMAL(9, 2),
-    `passport_id` INT UNIQUE,
-    CONSTRAINT fk
-        FOREIGN KEY (`passport_id`)
-            REFERENCES `passports` (passport_id)
-);
+# fourth exer
 
-INSERT INTO `people`(`first_name`,`salary`,`passport_id`)
-VALUES ('Roberto',43300.00,102),
-       ('Tom',56100.00,103),
-       ('Yana',60200.00,101);
+SELECT count(*)
+FROM employees AS e
 
-# One to Many Relationship
-CREATE DATABASE `cars`;
-CREATE TABLE `manufacturers`(
-   `manufacturer_id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(50) NOT NULL UNIQUE ,
-    `established_on` DATE
-);
-INSERT INTO `manufacturers` (`name`,`established_on`)
-VALUES ('BMW','1916/03/01'),
-       ('Tesla','2003/01/01'),
-       ('Lada','1966/05/01');
-CREATE TABLE `models`
-(
-    `model_id`        INT PRIMARY KEY AUTO_INCREMENT,
-    `name`            VARCHAR(70) NOT NULL,
-    `manufacturer_id` INT,
-    CONSTRAINT fk
-        FOREIGN KEY (`manufacturer_id`)
-            REFERENCES `manufacturers` (`manufacturer_id`)
+WHERE salary > (SELECT AVG(e1.salary)
+                FROM employees AS e1);
 
-);
-INSERT INTO `models`(`model_id`,`name`,`manufacturer_id`)
-VALUES (101,'X1',1),
-       (102,'i6',1),
-       (103,'Model S',2),
-       (104,'Model X',2),
-       (105,'Model 3',2),
-       (106,'Nova',3);
-# Many to Many Relationship
-CREATE DATABASE `school`;
-USE school;
-CREATE TABLE `students`
-(
-    `student_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(70) NOT NULL
-);
-INSERT INTO `students`(`name`)
-VALUES ('Mila'),
-       ('Toni'),
-       ('Ron');
-CREATE TABLE `exams`
-(
-    `exam_id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL
-);
-ALTER TABLE `exams` AUTO_INCREMENT = 101;
+# second exer
 
-INSERT INTO `exams` (`name`)
-VALUES ('Spring MVC'),
-       ('Neo4j'),
-       ('Oracle 11g');
+SELECT a.town_id,
+       t.name,
+       address_text
+FROM addresses AS a
+         JOIN towns AS t ON t.town_id = a.town_id
+WHERE t.name IN ('San Francisco', 'Sofia', 'Carnation')
+ORDER BY t.town_id, a.address_id;
 
-CREATE TABLE `students_exams`(
-    `student_id` INT NOT NULL,
-    `exam_id`    INT NOT NULL,
+# third Exer
+SELECT
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    d.department_id,
+    e.salary
 
-CONSTRAINT pk
-PRIMARY KEY (`student_id`, `exam_id`),
-
-CONSTRAINT fk_students
-FOREIGN KEY(`student_id`)
-REFERENCES `students`(`student_id`),
-
-CONSTRAINT fk_exams
-FOREIGN KEY (`exam_id`)
-REFERENCES `exams`(`exam_id`)
-);
-
-
-INSERT INTO `students_exams` (`student_id`,`exam_id`)
-VALUES
-    (1,101),
-    (1,102),
-    (2,101),
-    (3,103),
-    (2,102),
-    (2,103);
-# Self Referencing
-CREATE DATABASE `selfref`;
-CREATE TABLE `teachers` (
-    `teacher_id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(50) NOT NULL ,
-    `manager_id` INT
-);
-
-
-ALTER TABLE `teachers` AUTO_INCREMENT = 101;
-
-INSERT INTO `teachers`(`name`,`manager_id`)
-VALUES ('John', NULL),
-       ('Maya',106),
-       ('Silvia',106),
-       ('Ted',105),
-       ('Mark',101),
-       ('Greta',101);
-
-ALTER TABLE `teachers`
-ADD CONSTRAINT fk
-FOREIGN KEY (`manager_id`)
-REFERENCES teachers (`teacher_id`);
-
-# University Database
-CREATE DATABASE `university`;
-USE university;
-CREATE TABLE `subjects` (
-  `subject_id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-  `subject_name` VARCHAR(50)
-);
-
-CREATE TABLE `majors` (
-    `major_id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(50)
-);
-
-CREATE TABLE `payments` (
-    `payment_id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-    `payment_date` DATE  ,
-    `payment_amount` DECIMAL(8,2),
-    `student_id` INT
-);
-
-CREATE TABLE `students` (
-    `student_id` INT PRIMARY KEY AUTO_INCREMENT,
-    `student_number` VARCHAR(12) NOT NULL UNIQUE,
-    `student_name` VARCHAR(50) ,
-    `major_id` INT(11)
-
-);
-
-CREATE TABLE `agenda` (
-    `student_id` INT(11) ,
-    `subject_id` INT(11) ,
-    CONSTRAINT  pk
-    PRIMARY KEY (`student_id`,subject_id)
-    );
-
-ALTER TABLE `payments`
-ADD CONSTRAINT fk_students
-FOREIGN KEY (`student_id`)
-REFERENCES `students`(`student_id`);
-
-ALTER TABLE `students`
-ADD CONSTRAINT fk_majors
-FOREIGN KEY (`major_id`)
-REFERENCES `majors`(`major_id`);
-
-ALTER TABLE `agenda`
-ADD CONSTRAINT fk_subjects
-FOREIGN KEY (`subject_id`)
-REFERENCES `subjects`(`subject_id`);
-
-ALTER TABLE `students`
-ADD CONSTRAINT fk_agenda
-FOREIGN KEY (`student_id`)
-REFERENCES `agenda`(`student_id`);
-
-
-
-
-
+FROM employees AS e
+         RIGHT JOIN
+    departments AS d ON e.department_id = d.department_id
+WHERE e.manager_id IS NULL;
